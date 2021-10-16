@@ -1,19 +1,19 @@
 package services
 
 import (
-	"github.com/sledro/golang-framework/internal/storage"
+	"github.com/jmoiron/sqlx"
+	"github.com/sledro/golang-framework/internal/store"
 	"github.com/sledro/golang-framework/pkg/auth"
-	"gorm.io/gorm"
 )
 
 // UserCreate - Create a user
-func UserCreate(user storage.User, db *gorm.DB) error {
+func UserCreate(user store.User, db *sqlx.DB) error {
 	pass, err := auth.HashPassword(user.Password)
 	user.Password = string(pass)
 	if err != nil {
 		return nil
 	}
-	err = storage.UserCreate(user, db)
+	err = user.Create(db)
 	if err != nil {
 		return nil
 	}
@@ -21,26 +21,26 @@ func UserCreate(user storage.User, db *gorm.DB) error {
 }
 
 // UserCreate - Get a user
-func UserGet(user storage.User, db *gorm.DB) (storage.User, error) {
-	user, err := storage.UserGet(user, db)
+func UserGet(user store.User, db *sqlx.DB) (store.User, error) {
+	user, err := user.Get(db)
 	if err != nil {
-		return storage.User{}, err
+		return store.User{}, err
 	}
 	return user, nil
 }
 
 // UserUpdate - Updates a user
-func UserUpdate(user storage.User, userNew storage.User, db *gorm.DB) (storage.User, error) {
-	user, err := storage.UserUpdate(user, userNew, db)
+func UserUpdate(user store.User, userNew store.User, db *sqlx.DB) (store.User, error) {
+	user, err := user.Update(userNew, db)
 	if err != nil {
-		return storage.User{}, err
+		return store.User{}, err
 	}
 	return user, nil
 }
 
 // UserDelete - Deletes a user
-func UserDelete(user storage.User, db *gorm.DB) error {
-	err := storage.UserDelete(user, db)
+func UserDelete(user store.User, db *sqlx.DB) error {
+	err := user.Delete(db)
 	if err != nil {
 		return err
 	}
@@ -48,10 +48,10 @@ func UserDelete(user storage.User, db *gorm.DB) error {
 }
 
 // UserCreate - Get list of all users
-func UserList(db *gorm.DB) ([]storage.User, error) {
-	userList, err := storage.UserList(db)
+func UserList(db *sqlx.DB) ([]store.User, error) {
+	userList, err := store.UserList(db)
 	if err != nil {
-		return []storage.User{}, err
+		return []store.User{}, err
 	}
 	return userList, nil
 }

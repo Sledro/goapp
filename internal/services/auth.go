@@ -1,17 +1,17 @@
 package services
 
 import (
-	"github.com/sledro/golang-framework/internal/storage"
+	"github.com/jmoiron/sqlx"
+	"github.com/sledro/golang-framework/internal/store"
 	"github.com/sledro/golang-framework/pkg/auth"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 // Login - Here we cheecek the user email exists and the passwords match.
 // Finally ann auth token is created and returned
-func Login(email, password, apiToken string, db *gorm.DB) (string, error) {
+func Login(email, password, apiToken string, db *sqlx.DB) (string, error) {
 	// Check user with that email exists
-	user, err := UserGet(storage.User{Email: email}, db)
+	user, err := UserGet(store.User{Email: email}, db)
 	if err != nil {
 		return "", err
 	}

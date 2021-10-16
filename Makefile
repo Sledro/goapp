@@ -1,19 +1,15 @@
-.PHONY: build swagger
+# Builds the app to ./build/goapp
+.PHONY: build
 
 build: 
-	go build -o build/application cmd/golang-framework/main.go
+	go build -o build/goapp cmd/goapp/main.go
 
+# Runs the app located in ./build/goapp
+.PHONY:
 run:
-	build/application
+	build/goapp
 
-check-swagger:
-	which swagger || (GO111MODULE=off go get -u github.com/go-swagger/go-swagger/cmd/swagger)
-
-swagger: check-swagger
-	GO111MODULE=on go mod vendor && GO111MODULE=off swagger generate spec -o ./api/swagger.yaml --scan-models
-
-serve-swagger: check-swagger
-	swagger serve -F=swagger api/swagger.yaml
-
+# Builds the app docker as a image
+.PHONY:
 docker-build:
-	docker build --tag golang-framework .
+	docker build --tag goapp .

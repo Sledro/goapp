@@ -4,28 +4,33 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 	"github.com/micro/go-micro/util/log"
 	"github.com/sirupsen/logrus"
-	"github.com/sledro/golang-framework/internal/storage"
+
+	"github.com/sledro/golang-framework/internal/secrets"
+	"github.com/sledro/golang-framework/internal/store"
 	"github.com/sledro/golang-framework/pkg/logger"
-	"github.com/sledro/golang-framework/pkg/secrets"
-	"gorm.io/gorm"
 )
 
 // Server type
 type server struct {
 	r       *mux.Router
 	log     *logrus.Logger
-	db      *gorm.DB
-	secrets map[string]string
+	db      *sqlx.DB
+	secrets secrets.Secrets
 }
 
 // NewServer - Create Server
 func NewServer(secretName, region string) server {
 	s := server{}
 	s.log = logger.NewLogger()
-	s.secrets = secrets.LoadSecrets(secretName, region)
-	s.db = storage.NewDatabase(s.secrets["DB_USER"], s.secrets["DB_PASS"], s.secrets["DB_HOST"], s.secrets["DB_PORT"], s.secrets["DB_DATABASE"])
+	var err error
+	s.secrets, err = secrets.LoadSecrets(secretName, region)
+	if err != nil {
+		s.log.Error("error:", err)
+	}
+	s.db = store.NewDatabase(s.secrets.DBUser, s.secrets.DBPass, s.secrets.DBHost, s.secrets.DBPort, s.secrets.DBDatabase)
 	s.r = mux.NewRouter().StrictSlash(true)
 	return s
 }

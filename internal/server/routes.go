@@ -19,6 +19,6 @@ func (s *server) routes() {
 	v1.HandleFunc("/user", middleware.Headers(s.handleUserCreate)).Methods("POST")
 	v1.HandleFunc("/user", middleware.Headers(s.handleUserGet)).Methods("GET")
 	v1.HandleFunc("/user/{id}", middleware.Headers(s.handleUserUpdate)).Methods("PUT")
-	v1.HandleFunc("/user/{id}", middleware.Headers(middleware.Auth(s.handleUserDelete, s.secrets["JWT_SECRET"]))).Methods("DELETE")
+	v1.HandleFunc("/user/{id}", middleware.Headers(middleware.Auth(s.handleUserDelete, s.secrets.JWTSecret))).Methods("DELETE")
 	v1.HandleFunc("/user/list", middleware.Headers(s.handleUserList)).Methods("GET")
 }
