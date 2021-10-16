@@ -1,33 +1,52 @@
 package auth
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
+
+type customClaims struct {
+	UserID int  `json:"user_id"`
+	Admin  bool `json:"admin"`
+	jwt.StandardClaims
+}
 
 // CreateToken - Creates abd returns a new JTW token for the
 // given userID. Token expires after 1 hour
 func CreateToken(userID int, apiSecret string) (string, error) {
-	claims := jwt.MapClaims{}
-	claims["authorized"] = true
-	claims["user_id"] = userID
-	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+	// Create the Claims
+	claims := customClaims{
+		userID,
+		true,
+		jwt.StandardClaims{
+			Id:        strconv.FormatInt(time.Now().Unix()+int64(userID), 10),
+			Issuer:    "http://localhost.com:5000",
+			IssuedAt:  time.Now().Unix(),
+			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
+		},
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(apiSecret))
+	signedToken, err := token.SignedString([]byte(apiSecret))
+	if err != nil {
+		return "", err
+	}
+
+	return signedToken, nil
 
 }
 
-// TokenValid - Checks if the token passed in the reequest is
+// TokenValid - Checks if the token passed in the request is
 // valid. If not valid an error will reee returned
 func TokenValid(r *http.Request, apiSecret string) error {
-	tokenString := ExtractToken(r)
+	tokenString := extractToken(r)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -37,14 +56,14 @@ func TokenValid(r *http.Request, apiSecret string) error {
 	if err != nil {
 		return err
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		Pretty(claims)
+	if !token.Valid {
+		return errors.New("invliad token")
 	}
 	return nil
 }
 
-// ExtractToken - Gets a token from the req header
-func ExtractToken(r *http.Request) string {
+// extractToken - Gets a token from the req header
+func extractToken(r *http.Request) string {
 	keys := r.URL.Query()
 	token := keys.Get("token")
 	if token != "" {
@@ -57,21 +76,12 @@ func ExtractToken(r *http.Request) string {
 	return ""
 }
 
-// Pretty - Display the claims nicely in the terminal
-func Pretty(data interface{}) {
-	b, err := json.MarshalIndent(data, "", " ")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	fmt.Println(string(b))
-}
-
+// HashPassword - Returns the bcrypt hash of the password
 func HashPassword(password string) ([]byte, error) {
 	return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 }
 
+// HashPassword - Verifies the bcrypt hash of the password
 func VerifyPassword(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
