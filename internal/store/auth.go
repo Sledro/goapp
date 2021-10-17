@@ -4,17 +4,27 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+type AuthStore struct {
+	DB *sqlx.DB
+}
+
+type AuthStoreInterface interface {
+	Login(user User) (User, error)
+}
+
+var AuthStoreInstance AuthStoreInterface = &AuthStore{}
+
 var loginQuery = `
 SELECT * 
 FROM users 
 WHERE email=$1`
 
 // Login - Returns user of provided email
-func Login(user User, db *sqlx.DB) error {
+func (a *AuthStore) Login(user User) (User, error) {
 	u := User{}
-	err := db.Get(&u, loginQuery, user.Email)
+	err := a.DB.Get(&u, loginQuery, user.Email)
 	if err != nil {
-		return err
+		return u, err
 	}
-	return nil
+	return u, nil
 }

@@ -11,7 +11,6 @@ import (
 	validator "github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/sledro/goapp/api"
-	"github.com/sledro/goapp/internal/services"
 	"github.com/sledro/goapp/internal/store"
 )
 
@@ -40,7 +39,7 @@ func (s *server) handleUserCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create user
-	err = services.UserCreate(user, s.db)
+	err = s.services.UserService.Create(user)
 	if err != nil {
 		api.ERROR(w, http.StatusInternalServerError, err)
 		return
@@ -76,7 +75,7 @@ func (s *server) handleUserGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user
-	user, err = services.UserGet(user, s.db)
+	user, err = s.services.UserService.Get(user)
 	user.Password = ""
 	if err != nil {
 		api.ERROR(w, http.StatusInternalServerError, err)
@@ -112,7 +111,7 @@ func (s *server) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update user
-	userUpdated, err := services.UserUpdate(user, userNew, s.db)
+	userUpdated, err := s.services.UserService.Update(user, userNew)
 	if err != nil {
 		api.ERROR(w, http.StatusInternalServerError, err)
 		return
@@ -133,7 +132,7 @@ func (s *server) handleUserDelete(w http.ResponseWriter, r *http.Request) {
 	user := store.User{ID: userIDInt}
 
 	// Delete user
-	err = services.UserDelete(user, s.db)
+	err = s.services.UserService.Delete(user)
 	if err != nil {
 		api.ERROR(w, http.StatusInternalServerError, err)
 		return
@@ -163,7 +162,7 @@ func (s *server) handleUserList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// List users
-	userList, err := services.UserList(user, s.db)
+	userList, err := s.services.UserService.List(user)
 	if err != nil {
 		api.ERROR(w, http.StatusInternalServerError, err)
 		return

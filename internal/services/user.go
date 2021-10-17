@@ -3,61 +3,74 @@ package services
 import (
 	"errors"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/sledro/goapp/internal/store"
 	"github.com/sledro/goapp/pkg/auth"
 )
 
-// UserCreate - Create a user
-func UserCreate(user store.User, db *sqlx.DB) error {
+type UserService struct {
+	UserStore store.UserStoreInterface
+}
+
+type UserServiceInterface interface {
+	Create(user store.User) error
+	Get(user store.User) (store.User, error)
+	Update(user store.User, userNew store.User) (store.User, error)
+	Delete(user store.User) error
+	List(user store.User) ([]store.User, error)
+}
+
+var UserServiceInstance UserServiceInterface = &UserService{}
+
+// Create - Create a user
+func (s *UserService) Create(user store.User) error {
 	pass, err := auth.HashPassword(user.Password)
 	user.Password = string(pass)
 	if err != nil {
 		return nil
 	}
 	// Check if user already exists
-	_, err = user.Get(db)
+	_, err = s.UserStore.Get(user)
 	if err == nil {
 		return errors.New("username or email already exists")
 	}
 
-	err = user.Create(db)
+	err = s.UserStore.Create(user)
 	if err != nil {
 		return nil
 	}
 	return nil
 }
 
-// UserCreate - Get a user
-func UserGet(user store.User, db *sqlx.DB) (store.User, error) {
-	user, err := user.Get(db)
+// Get - Get a user
+func (s *UserService) Get(user store.User) (store.User, error) {
+	user, err := s.UserStore.Get(user)
 	if err != nil {
 		return store.User{}, err
 	}
 	return user, nil
 }
 
-// UserUpdate - Updates a user
-func UserUpdate(user store.User, userNew store.User, db *sqlx.DB) (store.User, error) {
-	user, err := user.Update(userNew, db)
+// Update - Updates a user
+func (s *UserService) Update(user store.User, userNew store.User) (store.User, error) {
+	user, err := s.UserStore.Update(userNew)
 	if err != nil {
 		return store.User{}, err
 	}
 	return user, nil
 }
 
-// UserDelete - Deletes a user
-func UserDelete(user store.User, db *sqlx.DB) error {
-	err := user.Delete(db)
+// Delete - Deletes a user
+func (s *UserService) Delete(user store.User) error {
+	err := s.UserStore.Delete(user)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// UserCreate - Get list of all users
-func UserList(user store.User, db *sqlx.DB) ([]store.User, error) {
-	userList, err := user.List(db)
+// List - Get list of all users
+func (s *UserService) List(user store.User) ([]store.User, error) {
+	userList, err := s.UserStore.List(user)
 	if err != nil {
 		return []store.User{}, err
 	}

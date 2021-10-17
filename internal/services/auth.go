@@ -7,11 +7,24 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type AuthService struct {
+	DB          *sqlx.DB
+	JWTSecret   string
+	UserService UserServiceInterface
+	AuthStore   store.AuthStoreInterface
+}
+
+type AuthServiceInterface interface {
+	Login(email, password string) (string, error)
+}
+
+var AuthServiceInstance AuthServiceInterface = &AuthService{}
+
 // Login - Here we checek the user email exists and the passwords match.
 // Finally an auth token is created and returned
-func Login(email, password, apiToken string, db *sqlx.DB) (string, error) {
+func (s *AuthService) Login(email, password string) (string, error) {
 	// Check user with that email exists
-	user, err := UserGet(store.User{Email: email}, db)
+	user, err := s.AuthStore.Login(store.User{Email: email})
 	if err != nil {
 		return "", err
 	}
@@ -23,7 +36,7 @@ func Login(email, password, apiToken string, db *sqlx.DB) (string, error) {
 	}
 
 	// Get auth token
-	token, err := auth.CreateToken(user.ID, apiToken)
+	token, err := auth.CreateToken(user.ID, s.JWTSecret)
 	if err != nil {
 		return "", err
 	}

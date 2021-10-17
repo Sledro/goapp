@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/sledro/goapp/api"
-	"github.com/sledro/goapp/internal/services"
 )
 
 // Credentials - Holds login credentials
@@ -33,7 +32,7 @@ func (s *server) handleAuthLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check the password and get the token
-	token, err := services.Login(credentials.Email, credentials.Password, s.secrets.JWTSecret, s.db)
+	token, err := s.services.AuthService.Login(credentials.Email, credentials.Password)
 	if err != nil {
 		api.ERROR(w, http.StatusUnauthorized, err)
 		return

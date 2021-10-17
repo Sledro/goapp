@@ -16,6 +16,20 @@ type User struct {
 	Email     string `json:"email" db:"email" validate:"required,email"`
 }
 
+type UserStore struct {
+	DB *sqlx.DB
+}
+
+type UserStoreInterface interface {
+	Create(user User) error
+	Get(user User) (User, error)
+	Update(userNew User) (User, error)
+	Delete(user User) error
+	List(user User) ([]User, error)
+}
+
+var UserStoreInstance UserStoreInterface = &UserStore{}
+
 var createUserQuery = `
 INSERT INTO users (firstname, lastname, username, password, email)
 VALUES (:firstname, :lastname, :username, :password, :email)`
@@ -35,46 +49,46 @@ SELECT id, firstname, lastname, username, email
 FROM users`
 
 // Create - Creates a user
-func (u *User) Create(db *sqlx.DB) error {
-	tx := db.MustBegin()
-	tx.NamedExec(createUserQuery, &u)
+func (s *UserStore) Create(user User) error {
+	tx := s.DB.MustBegin()
+	tx.NamedExec(createUserQuery, &user)
 	tx.Commit()
 	return nil
 }
 
 // Get - Gets a user
-func (u *User) Get(db *sqlx.DB) (User, error) {
-	user := User{}
-	err := db.Get(&user, getUserQuery, u.ID, u.Username, u.Email)
+func (s *UserStore) Get(user User) (User, error) {
+	userRes := User{}
+	err := s.DB.Get(&userRes, getUserQuery, user.ID, user.Username, user.Email)
 	if err != nil {
-		return user, errors.New("user not found")
+		return userRes, errors.New("user not found")
 	}
-	return user, nil
+	return userRes, nil
 }
 
 // Update - Updates a user
-func (u *User) Update(userNew User, db *sqlx.DB) (User, error) {
-	return *u, nil
+func (s *UserStore) Update(userNew User) (User, error) {
+	return userNew, nil
 }
 
 // Delete - Deletes a user
-func (u *User) Delete(db *sqlx.DB) error {
+func (s *UserStore) Delete(user User) error {
 	return nil
 }
 
 // UserList - Gets a list of users
-func (u *User) List(db *sqlx.DB) ([]User, error) {
+func (s *UserStore) List(user User) ([]User, error) {
 	var userList []User
 	// If search params then search users and return matching list
-	if (User{}) != *u {
-		err := db.Select(&userList, getUserListQuery, u.ID, u.Firstname, u.Lastname, u.Username, u.Email)
+	if (User{}) != user {
+		err := s.DB.Select(&userList, getUserListQuery, user.ID, user.Firstname, user.Lastname, user.Username, user.Email)
 		if err != nil {
 			return userList, err
 		}
 		return userList, nil
 	}
 	// No search params, return all
-	err := db.Select(&userList, getUserListAllQuery)
+	err := s.DB.Select(&userList, getUserListAllQuery)
 	if err != nil {
 		return userList, err
 	}
