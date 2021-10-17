@@ -1,5 +1,4 @@
-<h1 align="center">Golang REST API Framework</h1>
-<h3 align="center">Microservice</h3>
+<h1 align="center">Golang REST API Template</h1>
 
 <p align="center">
   <a href="https://opensource.org/licenses/mit-license.php"><img src="https://badges.frapsoft.com/os/mit/mit.svg?v=103" alt="Report"></a>
@@ -7,20 +6,27 @@
   <a href="#"><img src="https://img.shields.io/badge/version-0.0.1-brightgreen.svg" alt="Version"></a>
 </p>
 
-![alt text](https://cdn.dribbble.com/users/743744/screenshots/3847043/media/61700b194079c787a4d39e7ad060be81.jpg "Logo")
 
-Starter framework for building a REST API in Go
+Template for building a REST API in Go
 
-## To build
-```$ make build```
+- Project structure adheres to https://github.com/golang-standards/project-layout
+- Authentication
+- Database Migrations
+- Logging
+- http REST server
+- Gorm and gin frameworks avoided for full control
+- Config and env var management
 
-## To run
-```$ make run```
+## To build and run go app and postgres in docker containers
+
+```$ make docker-compose```
+
+Database migrations will run automatically if db does not exist
 
 ## How to use API
 The API can be accessed from: http://127.0.0.1:8080
 
 Request:
 ```
-curl --location --request GET 'http://127.0.0.1:8080/api/health'
+curl --location --request GET "127.0.0.1:8080/v1/api/health"
 ```
