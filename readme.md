@@ -10,18 +10,24 @@
 Template for building a REST API in Go
 
 - Project structure adheres to https://github.com/golang-standards/project-layout
+- HTTP REST server
 - Authentication
+- PostgreSQL
+- SQLX driver
 - Database Migrations
 - Logging
-- http REST server
 - Gorm and gin frameworks avoided for full control
 - Config and env var management
+
+## Information
+- database migrations can be found in the `/schemas` dir
+- database migrations will run automatically if db does not exist
+- `config/secrets.json` will be loaded by app on init
+- if `config/secrets.json` does not exist the app will try pull them from AWS Secreets Mannager service
 
 ## To build and run go app and postgres in docker containers
 
 ```$ make docker-compose```
-
-Database migrations will run automatically if db does not exist
 
 ## How to use API
 The API can be accessed from: http://127.0.0.1:8080
