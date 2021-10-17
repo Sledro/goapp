@@ -94,7 +94,6 @@ func (s *server) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
 		api.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	user := store.User{ID: userIDInt}
 
 	// Read the request body
 	body, err := ioutil.ReadAll(r.Body)
@@ -103,7 +102,7 @@ func (s *server) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create user object
-	userNew := store.User{}
+	user := store.User{ID: userIDInt}
 	err = json.Unmarshal(body, &user)
 	if err != nil {
 		api.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -111,7 +110,7 @@ func (s *server) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update user
-	userUpdated, err := s.services.UserService.Update(user, userNew)
+	userUpdated, err := s.services.UserService.Update(user)
 	if err != nil {
 		api.ERROR(w, http.StatusInternalServerError, err)
 		return

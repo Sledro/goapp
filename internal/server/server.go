@@ -61,8 +61,7 @@ func NewServer(secretName, region string) server {
 	}
 	// Inject services
 	services.UserServiceInstance = &services.UserService{UserStore: s.stores.UserStore}
-	services.AuthServiceInstance = &services.AuthService{DB: s.db, JWTSecret: s.secrets.JWTSecret, UserService: services.UserServiceInstance}
-
+	services.AuthServiceInstance = &services.AuthService{DB: s.db, JWTSecret: s.secrets.JWTSecret, UserService: services.UserServiceInstance, AuthStore: s.stores.AuthStore}
 	s.services = &Services{
 		AuthService: services.AuthServiceInstance,
 		UserService: services.UserServiceInstance,

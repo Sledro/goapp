@@ -39,6 +39,16 @@ SELECT id, firstname, lastname, username, email
 FROM users
 WHERE id=$1 OR username=$2 OR email=$3`
 
+var updateUserQuery = `
+UPDATE users 
+SET firstname=$1, lastname=$2 
+WHERE id=$3`
+
+var deleteUserQuery = `
+DELETE 
+FROM users 
+WHERE id=$1`
+
 var getUserListQuery = `
 SELECT id, firstname, lastname, username, email
 FROM users
@@ -67,12 +77,18 @@ func (s *UserStore) Get(user User) (User, error) {
 }
 
 // Update - Updates a user
-func (s *UserStore) Update(userNew User) (User, error) {
-	return userNew, nil
+func (s *UserStore) Update(user User) (User, error) {
+	tx := s.DB.MustBegin()
+	s.DB.Exec(updateUserQuery, user.Firstname, user.Lastname, user.ID)
+	tx.Commit()
+	return user, nil
 }
 
 // Delete - Deletes a user
 func (s *UserStore) Delete(user User) error {
+	tx := s.DB.MustBegin()
+	s.DB.Exec(deleteUserQuery, user.ID)
+	tx.Commit()
 	return nil
 }
 

@@ -14,7 +14,7 @@ type UserService struct {
 type UserServiceInterface interface {
 	Create(user store.User) error
 	Get(user store.User) (store.User, error)
-	Update(user store.User, userNew store.User) (store.User, error)
+	Update(user store.User) (store.User, error)
 	Delete(user store.User) error
 	List(user store.User) ([]store.User, error)
 }
@@ -51,8 +51,8 @@ func (s *UserService) Get(user store.User) (store.User, error) {
 }
 
 // Update - Updates a user
-func (s *UserService) Update(user store.User, userNew store.User) (store.User, error) {
-	user, err := s.UserStore.Update(userNew)
+func (s *UserService) Update(user store.User) (store.User, error) {
+	user, err := s.UserStore.Update(user)
 	if err != nil {
 		return store.User{}, err
 	}
