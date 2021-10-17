@@ -6,27 +6,25 @@ import (
 
 // User - An app user
 type User struct {
-	ID        int    `json:"user_id"`
-	Firstname string `json:"firstname" validate:"required,min=3,max=100"`
-	Lastname  string `json:"lastname" validate:"required,min=3,max=100"`
-	Username  string `json:"username" validate:"required,min=3,max=30"`
-	Password  string `json:"password,omitempty" validate:"required,min=8,max=30"`
-	Email     string `json:"email" validate:"required,email"`
+	ID        int    `json:"id" db:"id"`
+	Firstname string `json:"firstname" db:"firstname" validate:"required,min=3,max=100"`
+	Lastname  string `json:"lastname" db:"lastname" validate:"required,min=3,max=100"`
+	Username  string `json:"username" db:"username" validate:"required,min=3,max=30"`
+	Password  string `json:"password,omitempty" db:"password" validate:"required,min=8,max=30"`
+	Email     string `json:"email" db:"email" validate:"required,email"`
 }
 
-// HomeAddress - Users home address
-
 var createUserQuery = `
-INSERT INTO users (firstname, lastname, username, password, email) 
+INSERT INTO users (firstname, lastname, username, password, email)
 VALUES (:firstname, :lastname, :username, :password, :email)`
 
 var getUserQuery = `
-SELECT (firstname, lastname, username, email)
+SELECT id, firstname, lastname, username, email
 FROM users
 WHERE id=$1`
 
 var getUserListQuery = `
-SELECT (firstname, lastname, username, email)
+SELECT id, firstname, lastname, username, email
 FROM users`
 
 // Create - Creates a user
@@ -44,7 +42,7 @@ func (u *User) Get(db *sqlx.DB) (User, error) {
 	if err != nil {
 		return user, err
 	}
-	return *u, nil
+	return user, nil
 }
 
 // Update - Updates a user

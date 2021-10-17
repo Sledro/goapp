@@ -17,16 +17,18 @@ func NewDatabase(username, password, host, port, database string) *sqlx.DB {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	runMigrations(db)
+	return db
+}
 
-	// OR: Read migrations from a folder:
+// runMigrations - Runs dataase migrations
+func runMigrations(db *sqlx.DB) {
 	migrations := &migrate.FileMigrationSource{
 		Dir: "schema",
 	}
-
 	n, err := migrate.Exec(db.DB, "postgres", migrations, migrate.Up)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	fmt.Printf("Applied %d migrations!\n", n)
-	return db
 }
