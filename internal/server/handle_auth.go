@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/sledro/golang-framework/api"
-	"github.com/sledro/golang-framework/internal/services"
+	"github.com/sledro/goapp/api"
+	"github.com/sledro/goapp/internal/services"
 )
 
 // Credentials - Holds login credentials

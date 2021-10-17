@@ -10,9 +10,9 @@ import (
 
 	validator "github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
-	"github.com/sledro/golang-framework/api"
-	"github.com/sledro/golang-framework/internal/services"
-	"github.com/sledro/golang-framework/internal/store"
+	"github.com/sledro/goapp/api"
+	"github.com/sledro/goapp/internal/services"
+	"github.com/sledro/goapp/internal/store"
 )
 
 // handleUserCreate - Create a user

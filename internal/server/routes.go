@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/sledro/golang-framework/internal/middleware"
+	"github.com/sledro/goapp/internal/middleware"
 )
 
 // routes - defines all api endpoints

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/sledro/golang-framework/internal/server"
+	"github.com/sledro/goapp/internal/server"
 )
 
 func main() {
-	server := server.NewServer("golang-framework", "eu-west-1")
+	server := server.NewServer("goapp", "eu-west-1")
 	server.StartServer()
 }

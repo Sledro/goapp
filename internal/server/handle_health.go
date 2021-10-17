@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/sledro/golang-framework/api"
+	"github.com/sledro/goapp/api"
 )
 
 // handleHealthCheck - can be used to check if the server is online

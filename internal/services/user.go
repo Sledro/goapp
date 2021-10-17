@@ -2,8 +2,8 @@ package services
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/sledro/golang-framework/internal/store"
-	"github.com/sledro/golang-framework/pkg/auth"
+	"github.com/sledro/goapp/internal/store"
+	"github.com/sledro/goapp/pkg/auth"
 )
 
 // UserCreate - Create a user

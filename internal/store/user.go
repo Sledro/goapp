@@ -6,38 +6,28 @@ import (
 
 // User - An app user
 type User struct {
-	ID        int         `json:"user_id"`
-	Firstname string      `json:"firstname" validate:"required,min=3,max=100"`
-	Lastname  string      `json:"lastname" validate:"required,min=3,max=100"`
-	Username  string      `json:"username" validate:"required,min=3,max=30"`
-	Password  string      `json:"password,omitempty" validate:"required,min=8,max=30"`
-	Email     string      `json:"email" validate:"required,email"`
-	Address   HomeAddress `json:"home_address" validate:"required"`
+	ID        int    `json:"user_id"`
+	Firstname string `json:"firstname" validate:"required,min=3,max=100"`
+	Lastname  string `json:"lastname" validate:"required,min=3,max=100"`
+	Username  string `json:"username" validate:"required,min=3,max=30"`
+	Password  string `json:"password,omitempty" validate:"required,min=8,max=30"`
+	Email     string `json:"email" validate:"required,email"`
 }
 
 // HomeAddress - Users home address
-type HomeAddress struct {
-	UserID  int    `json:"user_id"`
-	Street1 string `json:"street1" validate:"required,min=3,max=100"`
-	Street2 string `json:"street2" validate:"min=0,max=100"`
-	Town    string `json:"town" validate:"required,min=3,max=100"`
-	City    string `json:"city" validate:"required,min=3,max=100"`
-	Country string `json:"country" validate:"required,min=3,max=100"`
-}
 
 var createUserQuery = `
-INSERT INTO users (firstname, lastname, username, password, email, home_address) 
-VALUES (:firstname, :lastname, :username, :password, :email, :home_address)`
+INSERT INTO users (firstname, lastname, username, password, email) 
+VALUES (:firstname, :lastname, :username, :password, :email)`
 
 var getUserQuery = `
-SELECT (firstname, lastname, username, email, home_address)
+SELECT (firstname, lastname, username, email)
 FROM users
 WHERE id=$1`
 
 var getUserListQuery = `
-SELECT (firstname, lastname, username, email, home_address)
-FROM users
-WHERE id=$1`
+SELECT (firstname, lastname, username, email)
+FROM users`
 
 // Create - Creates a user
 func (u *User) Create(db *sqlx.DB) error {

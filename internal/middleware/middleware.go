@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/sledro/golang-framework/api"
-	"github.com/sledro/golang-framework/pkg/auth"
+	"github.com/sledro/goapp/api"
+	"github.com/sledro/goapp/pkg/auth"
 )
 
 // Headers - Sets HTTP headers such as content type

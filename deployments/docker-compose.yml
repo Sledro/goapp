@@ -1,3 +1,4 @@
+# docker-compose -f "deployments/docker-compose.yml" up -d --build
 # Specify the version for docker-compose.yml
 version: "3.8"
 
@@ -15,11 +16,13 @@ services:
     volumes: 
       - dbdata:/var/lib/postgresql/data
 
-  go-app:
-    container_name: go-app
+  goapp:
+    container_name: goapp
     # build the Dockerfile, alternatively use an image.
     build:
-      context: .
+      context: ..
+    ports:
+      - "8080:8080"
     depends_on:
       - "postgres"
 

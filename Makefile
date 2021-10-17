@@ -13,3 +13,8 @@ run:
 .PHONY:
 docker-build:
 	docker build --tag goapp .
+
+# Builds the local docker compose env
+.PHONY:
+docker-compose:
+	docker-compose -f "deployments/docker-compose.yml" up -d --build

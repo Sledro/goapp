@@ -19,12 +19,12 @@ type Secrets struct {
 	JWTSecret  string `json:"jwt_secret"`
 }
 
-// LoadSecrets - first attempts to load secrets from .env file
-// if no .env file is found, will attempt to load from aws
+// LoadSecrets - first attempts to load secrets from secrets.json file
+// if no secrets.json file is found, will attempt to load from aws
 // secrets manager
 func LoadSecrets(secretName, region string) (Secrets, error) {
 	secrets := Secrets{}
-	configJSON, err := ioutil.ReadFile("configs/local.json")
+	configJSON, err := ioutil.ReadFile("configs/secrets.json")
 	if err != nil {
 		return secrets, err
 	}
