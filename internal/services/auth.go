@@ -7,8 +7,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Login - Here we cheecek the user email exists and the passwords match.
-// Finally ann auth token is created and returned
+// Login - Here we checek the user email exists and the passwords match.
+// Finally an auth token is created and returned
 func Login(email, password, apiToken string, db *sqlx.DB) (string, error) {
 	// Check user with that email exists
 	user, err := UserGet(store.User{Email: email}, db)

@@ -90,7 +90,11 @@ func (s *server) handleUserGet(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
 	// Parse path var
 	userIDString := mux.Vars(r)["id"]
-	userIDInt, _ := strconv.Atoi(userIDString)
+	userIDInt, err := strconv.Atoi(userIDString)
+	if err != nil {
+		api.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
 	user := store.User{ID: userIDInt}
 
 	// Read the request body
@@ -121,11 +125,15 @@ func (s *server) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleUserDelete(w http.ResponseWriter, r *http.Request) {
 	// Parse path var
 	userIDString := mux.Vars(r)["id"]
-	userIDInt, _ := strconv.Atoi(userIDString)
+	userIDInt, err := strconv.Atoi(userIDString)
+	if err != nil {
+		api.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
 	user := store.User{ID: userIDInt}
 
 	// Delete user
-	err := services.UserDelete(user, s.db)
+	err = services.UserDelete(user, s.db)
 	if err != nil {
 		api.ERROR(w, http.StatusInternalServerError, err)
 		return
@@ -136,8 +144,26 @@ func (s *server) handleUserDelete(w http.ResponseWriter, r *http.Request) {
 
 // handleUserList - Get a list of all users
 func (s *server) handleUserList(w http.ResponseWriter, r *http.Request) {
-	// Create user
-	userList, err := services.UserList(s.db)
+	// Read the request body
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		api.ERROR(w, http.StatusUnprocessableEntity, err)
+	}
+
+	// Create user object
+	user := store.User{}
+
+	// If request had payload parse it
+	if len(body) > 0 {
+		err = json.Unmarshal(body, &user)
+		if err != nil {
+			api.ERROR(w, http.StatusUnprocessableEntity, err)
+			return
+		}
+	}
+
+	// List users
+	userList, err := services.UserList(user, s.db)
 	if err != nil {
 		api.ERROR(w, http.StatusInternalServerError, err)
 		return

@@ -1,6 +1,8 @@
 package services
 
 import (
+	"errors"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/sledro/goapp/internal/store"
 	"github.com/sledro/goapp/pkg/auth"
@@ -13,6 +15,12 @@ func UserCreate(user store.User, db *sqlx.DB) error {
 	if err != nil {
 		return nil
 	}
+	// Check if user already exists
+	_, err = user.Get(db)
+	if err == nil {
+		return errors.New("username or email already exists")
+	}
+
 	err = user.Create(db)
 	if err != nil {
 		return nil
@@ -48,8 +56,8 @@ func UserDelete(user store.User, db *sqlx.DB) error {
 }
 
 // UserCreate - Get list of all users
-func UserList(db *sqlx.DB) ([]store.User, error) {
-	userList, err := store.UserList(db)
+func UserList(user store.User, db *sqlx.DB) ([]store.User, error) {
+	userList, err := user.List(db)
 	if err != nil {
 		return []store.User{}, err
 	}

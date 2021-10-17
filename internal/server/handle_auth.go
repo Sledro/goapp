@@ -35,7 +35,7 @@ func (s *server) handleAuthLogin(w http.ResponseWriter, r *http.Request) {
 	// Check the password and get the token
 	token, err := services.Login(credentials.Email, credentials.Password, s.secrets.JWTSecret, s.db)
 	if err != nil {
-		api.ERROR(w, http.StatusUnprocessableEntity, err)
+		api.ERROR(w, http.StatusUnauthorized, err)
 		return
 	}
 	// Sort the data to be returned

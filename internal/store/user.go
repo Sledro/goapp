@@ -1,6 +1,8 @@
 package store
 
 import (
+	"errors"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -21,9 +23,14 @@ VALUES (:firstname, :lastname, :username, :password, :email)`
 var getUserQuery = `
 SELECT id, firstname, lastname, username, email
 FROM users
-WHERE id=$1`
+WHERE id=$1 OR username=$2 OR email=$3`
 
 var getUserListQuery = `
+SELECT id, firstname, lastname, username, email
+FROM users
+WHERE id=$1 OR firstname=$2 OR lastname=$3 OR username=$4 OR email=$5`
+
+var getUserListAllQuery = `
 SELECT id, firstname, lastname, username, email
 FROM users`
 
@@ -38,9 +45,9 @@ func (u *User) Create(db *sqlx.DB) error {
 // Get - Gets a user
 func (u *User) Get(db *sqlx.DB) (User, error) {
 	user := User{}
-	err := db.Get(&user, getUserQuery, u.ID)
+	err := db.Get(&user, getUserQuery, u.ID, u.Username, u.Email)
 	if err != nil {
-		return user, err
+		return user, errors.New("user not found")
 	}
 	return user, nil
 }
@@ -56,9 +63,18 @@ func (u *User) Delete(db *sqlx.DB) error {
 }
 
 // UserList - Gets a list of users
-func UserList(db *sqlx.DB) ([]User, error) {
+func (u *User) List(db *sqlx.DB) ([]User, error) {
 	var userList []User
-	err := db.Select(&userList, getUserListQuery)
+	// If search params then search users and return matching list
+	if (User{}) != *u {
+		err := db.Select(&userList, getUserListQuery, u.ID, u.Firstname, u.Lastname, u.Username, u.Email)
+		if err != nil {
+			return userList, err
+		}
+		return userList, nil
+	}
+	// No search params, return all
+	err := db.Select(&userList, getUserListAllQuery)
 	if err != nil {
 		return userList, err
 	}
