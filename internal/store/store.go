@@ -4,10 +4,18 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	migrate "github.com/rubenv/sql-migrate"
 )
+
+// NewTestDatabase - Create a new mock database conection
+func NewTestDatabase() (*sqlx.DB, sqlmock.Sqlmock, error) {
+	mockDB, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	mockDBSQLX := sqlx.NewDb(mockDB, "mysql") // returns *sqlx.DB
+	return mockDBSQLX, mock, err
+}
 
 // NewDatabase - Create a new database conection. Schema will be migrated if
 // not found
