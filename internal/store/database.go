@@ -10,13 +10,6 @@ import (
 	migrate "github.com/rubenv/sql-migrate"
 )
 
-// NewTestDatabase - Create a new mock database conection
-func NewTestDatabase() (*sqlx.DB, sqlmock.Sqlmock, error) {
-	mockDB, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
-	mockDBSQLX := sqlx.NewDb(mockDB, "mysql") // returns *sqlx.DB
-	return mockDBSQLX, mock, err
-}
-
 // NewDatabase - Create a new database conection. Schema will be migrated if
 // not found
 func NewDatabase(username, password, host, port, database string) *sqlx.DB {
@@ -27,6 +20,13 @@ func NewDatabase(username, password, host, port, database string) *sqlx.DB {
 	}
 	runMigrations(db)
 	return db
+}
+
+// NewTestDatabase - Create a new mock database conection
+func NewTestDatabase() (*sqlx.DB, sqlmock.Sqlmock, error) {
+	mockDB, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	mockDBSQLX := sqlx.NewDb(mockDB, "mysql") // returns *sqlx.DB
+	return mockDBSQLX, mock, err
 }
 
 // runMigrations - Runs dataase migrations

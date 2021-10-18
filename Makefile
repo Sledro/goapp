@@ -9,6 +9,11 @@ build:
 run:
 	build/goapp
 
+# Runs unit tests
+.PHONY:
+test:
+	go test ./... -race -coverprofile=coverage.out
+
 # Builds the app docker as a image
 .PHONY:
 docker-build:
