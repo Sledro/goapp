@@ -1,6 +1,8 @@
 package store
 
 import (
+	"errors"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -24,6 +26,9 @@ func (a *AuthStore) Login(user User) (User, error) {
 	u := User{}
 	err := a.DB.Get(&u, loginQuery, user.Email)
 	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return u, errors.New("user does not exist")
+		}
 		return u, err
 	}
 	return u, nil

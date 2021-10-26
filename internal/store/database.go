@@ -18,6 +18,7 @@ func NewDatabase(username, password, host, port, database string) *sqlx.DB {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	db.SetMaxOpenConns(100)
 	runMigrations(db)
 	return db
 }

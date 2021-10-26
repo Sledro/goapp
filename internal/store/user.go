@@ -21,9 +21,9 @@ type UserStore struct {
 }
 
 type UserStoreInterface interface {
-	Create(user User) error
+	Create(user User) (User, error)
 	Get(user User) (User, error)
-	Update(userNew User) (User, error)
+	Update(user User) (User, error)
 	Delete(user User) error
 	List(user User) ([]User, error)
 }
@@ -59,11 +59,11 @@ SELECT id, firstname, lastname, username, email
 FROM users`
 
 // Create - Creates a user
-func (s *UserStore) Create(user User) error {
+func (s *UserStore) Create(user User) (User, error) {
 	tx := s.DB.MustBegin()
 	tx.NamedExec(createUserQuery, &user)
 	tx.Commit()
-	return nil
+	return user, nil
 }
 
 // Get - Gets a user

@@ -1,24 +1,72 @@
 package server
 
 import (
-	"github.com/sledro/goapp/internal/middleware"
+	"net/http"
+	"time"
+
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
+	"github.com/sledro/goapp/api"
 )
 
-// routes - defines all api endpoints
+// routes - Setups chi router, middlewares and defines all api endpoints
 func (s *server) routes() {
+	// Inject routes
+	s.r = chi.NewRouter()
+
+	// Basic CORS
+	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
+	s.r.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"https://*", "http://*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
+
+	// Inject chi middleware
+	// A good base middleware stack
+	// Injects a request ID into the context of each request
+	s.r.Use(middleware.RequestID)
+	// Sets a http.Request's RemoteAddr to either X-Real-IP or X-Forwarded-For
+	s.r.Use(middleware.RealIP)
+	// Logs the start and end of each request with the elapsed processing time
+	s.r.Use(middleware.Logger)
+	// Gracefully absorb panics and prints the stack trace
+	s.r.Use(middleware.Recoverer)
+	// Sets HTTP response headers as content type JSON
+	s.r.Use(middleware.SetHeader("Content-Type", "application/json"))
+
+	// Set a timeout value on the request context (ctx), that will signal
+	// through ctx.Done() that the request has timed out and further
+	// processing should be stopped.
+	s.r.Use(middleware.Timeout(60 * time.Second))
+
 	// setup v1 subrouter
-	v1 := s.r.PathPrefix("/v1").Subrouter()
+	s.r.Route("/v1", func(r chi.Router) {
 
-	// api routes
-	v1.HandleFunc("/api/health", middleware.Headers(s.handleHealthCheck)).Methods("GET")
+		// health
+		r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+			api.JSON(w, 200, map[string]interface{}{"health_status": "online", "string": "test", "int": 3, "float": 1.32, "bool": true})
+		})
 
-	// auth routes
-	v1.HandleFunc("/auth", middleware.Headers(s.handleAuthLogin)).Methods("POST")
+		// auth
+		r.Route("/auth", func(r chi.Router) {
+			r.Post("/", s.handleAuthLogin) // POST /users
+		})
 
-	// user routes CRUDL
-	v1.HandleFunc("/user", middleware.Headers(s.handleUserCreate)).Methods("POST")
-	v1.HandleFunc("/user", middleware.Headers(s.handleUserGet)).Methods("GET")
-	v1.HandleFunc("/user/{id}", middleware.Headers(s.handleUserUpdate)).Methods("PUT")
-	v1.HandleFunc("/user/{id}", middleware.Headers(middleware.Auth(s.handleUserDelete, s.secrets.JWTSecret))).Methods("DELETE")
-	v1.HandleFunc("/user/list", middleware.Headers(s.handleUserList)).Methods("GET")
+		// user
+		r.Route("/user", func(r chi.Router) {
+			r.Post("/", s.handleUserCreate)
+			r.Get("/", s.handleUserGet)
+			r.Put("/user/{id}", s.handleUserUpdate)
+			r.Delete("/user/{id}", s.handleUserDelete)
+			r.Get("/list", s.handleUserList)
+		})
+
+	})
 }

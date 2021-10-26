@@ -12,7 +12,7 @@ type UserService struct {
 }
 
 type UserServiceInterface interface {
-	Create(user store.User) error
+	Create(user store.User) (store.User, error)
 	Get(user store.User) (store.User, error)
 	Update(user store.User) (store.User, error)
 	Delete(user store.User) error
@@ -22,23 +22,23 @@ type UserServiceInterface interface {
 var UserServiceInstance UserServiceInterface = &UserService{}
 
 // Create - Create a user
-func (s *UserService) Create(user store.User) error {
+func (s *UserService) Create(user store.User) (store.User, error) {
 	pass, err := auth.HashPassword(user.Password)
 	user.Password = string(pass)
 	if err != nil {
-		return nil
+		return user, nil
 	}
 	// Check if user already exists
 	_, err = s.UserStore.Get(user)
 	if err == nil {
-		return errors.New("username or email already exists")
+		return user, errors.New("username or email already exists")
 	}
 
-	err = s.UserStore.Create(user)
+	user, err = s.UserStore.Create(user)
 	if err != nil {
-		return nil
+		return user, nil
 	}
-	return nil
+	return user, nil
 }
 
 // Get - Get a user

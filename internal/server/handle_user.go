@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"errors"
-
 	validator "github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/sledro/goapp/api"
@@ -16,15 +14,9 @@ import (
 
 // handleUserCreate - Create a user
 func (s *server) handleUserCreate(w http.ResponseWriter, r *http.Request) {
-	// Read the request body
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		api.ERROR(w, http.StatusUnprocessableEntity, err)
-	}
-
-	// Create user object
-	user := store.User{}
-	err = json.Unmarshal(body, &user)
+	// Read the request
+	var user store.User
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		api.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
@@ -39,44 +31,7 @@ func (s *server) handleUserCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create user
-	err = s.services.UserService.Create(user)
-	if err != nil {
-		api.ERROR(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	// Sort the data to be returned
-	sortData := map[string]interface{}{
-		"status": "success",
-	}
-	api.JSON(w, http.StatusCreated, sortData)
-}
-
-// handleUserView - Get a user
-func (s *server) handleUserGet(w http.ResponseWriter, r *http.Request) {
-	// Read the request body
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		api.ERROR(w, http.StatusUnprocessableEntity, err)
-	}
-
-	// Create user object
-	user := store.User{}
-	err = json.Unmarshal(body, &user)
-	if err != nil {
-		api.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	// Remove password from user so we dont seach on that field
-	if user.Password != "" {
-		api.ERROR(w, http.StatusUnprocessableEntity, errors.New("can not use password field here"))
-		return
-	}
-
-	// Get user
-	user, err = s.services.UserService.Get(user)
-	user.Password = ""
+	user, err = s.services.UserService.Create(user)
 	if err != nil {
 		api.ERROR(w, http.StatusInternalServerError, err)
 		return
@@ -85,41 +40,46 @@ func (s *server) handleUserGet(w http.ResponseWriter, r *http.Request) {
 	api.JSON(w, http.StatusCreated, user)
 }
 
-// handleUserList - Updates a user
-func (s *server) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
-	// Parse path var
-	userIDString := mux.Vars(r)["id"]
-	userIDInt, err := strconv.Atoi(userIDString)
-	if err != nil {
-		api.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
+// handleUserGet - Get a user
+func (s *server) handleUserGet(w http.ResponseWriter, r *http.Request) {
+	// Read the request
+	user := api.Read(w, r).(store.User)
 
-	// Read the request body
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		api.ERROR(w, http.StatusUnprocessableEntity, err)
-	}
-
-	// Create user object
-	user := store.User{ID: userIDInt}
-	err = json.Unmarshal(body, &user)
-	if err != nil {
-		api.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	// Update user
-	userUpdated, err := s.services.UserService.Update(user)
+	// Get user
+	user, err := s.services.UserService.Get(user)
 	if err != nil {
 		api.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	api.JSON(w, http.StatusCreated, userUpdated)
+	api.JSON(w, http.StatusCreated, user)
 }
 
-// handleUserList - Deletes a user
+// handleUserUpdate - Updates a user
+func (s *server) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
+	// Parse path var
+	userID, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		api.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	// Read the request
+	user := api.Read(w, r).(store.User)
+	// Set userID that we want to update
+	user.ID = userID
+
+	// Update user
+	user, err = s.services.UserService.Update(user)
+	if err != nil {
+		api.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	api.JSON(w, http.StatusCreated, user)
+}
+
+// handleUserDelete - Deletes a user
 func (s *server) handleUserDelete(w http.ResponseWriter, r *http.Request) {
 	// Parse path var
 	userIDString := mux.Vars(r)["id"]

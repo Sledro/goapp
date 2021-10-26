@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"github.com/jmoiron/sqlx"
 	"github.com/micro/go-micro/util/log"
 	"github.com/sirupsen/logrus"
@@ -16,7 +16,7 @@ import (
 
 // Server type
 type server struct {
-	r        *mux.Router
+	r        chi.Router
 	log      *logrus.Logger
 	db       *sqlx.DB
 	secrets  secrets.Secrets
@@ -66,8 +66,6 @@ func NewServer(secretName, region string) server {
 		AuthService: services.AuthServiceInstance,
 		UserService: services.UserServiceInstance,
 	}
-	// Inject routes
-	s.r = mux.NewRouter().StrictSlash(true)
 	return s
 }
 

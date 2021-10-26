@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/sledro/goapp/api"
@@ -17,30 +16,19 @@ type Credentials struct {
 // handleAuthLogin - This function checks the users email and password
 // match. If they matcn an oauth token is returned
 func (s *server) handleAuthLogin(w http.ResponseWriter, r *http.Request) {
-	// Read request body
-	body, err := ioutil.ReadAll(r.Body)
+	// Read the request
+	var credentials Credentials
+	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
 		api.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	// Parse credentials
-	credentials := Credentials{}
-	err = json.Unmarshal(body, &credentials)
-	if err != nil {
-		api.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
 	// Check the password and get the token
 	token, err := s.services.AuthService.Login(credentials.Email, credentials.Password)
 	if err != nil {
 		api.ERROR(w, http.StatusUnauthorized, err)
 		return
 	}
-	// Sort the data to be returned
-	sortData := map[string]string{
-		"token": token,
-	}
 
-	api.JSON(w, http.StatusOK, sortData)
+	api.JSON(w, http.StatusOK, map[string]interface{}{"token": token})
 }

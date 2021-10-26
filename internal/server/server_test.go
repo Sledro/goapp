@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"github.com/sledro/goapp/internal/store"
 )
 
@@ -38,7 +38,7 @@ func NewTestServer(t *testing.T) (*httptest.Server, sqlmock.Sqlmock, server) {
 	// Inject mock db
 	server.db = db
 	// Inject routes
-	server.r = mux.NewRouter().StrictSlash(true)
+	server.r = chi.NewRouter()
 	return httptest.NewServer(server.r), mock, server
 }
 
