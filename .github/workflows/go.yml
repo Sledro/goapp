@@ -21,11 +21,11 @@ jobs:
     # Run vet & lint on the code
     - name: Run vet & lint
       run: |
-        go vet .
-        golint .
+        go vet cmd/goapp/main.go
+        golint cmd/goapp/main.go
 
     - name: Build
-      run: go build -v ./...
+      run: go build -o build/goapp cmd/goapp/main.go
 
     - name: Test
       run: go test -v ./...
