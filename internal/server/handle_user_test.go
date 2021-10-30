@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/sledro/goapp/api"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHandleUserCreate(t *testing.T) {
@@ -26,7 +27,8 @@ func TestHandleUserCreate(t *testing.T) {
 			},
 			TestFunc: func(body []byte, t *testing.T) {
 				var res api.Response
-				json.Unmarshal(body, &res)
+				err := json.Unmarshal(body, &res)
+				assert.Equal(t, err, nil)
 				//assert.NotContains(t, "res", res.Response)
 			},
 		},

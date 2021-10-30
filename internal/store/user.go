@@ -61,8 +61,14 @@ FROM users`
 // Create - Creates a user
 func (s *UserStore) Create(user User) (User, error) {
 	tx := s.DB.MustBegin()
-	tx.NamedExec(createUserQuery, &user)
-	tx.Commit()
+	_, err := tx.NamedExec(createUserQuery, &user)
+	if err != nil {
+		return user, err
+	}
+	err = tx.Commit()
+	if err != nil {
+		return user, err
+	}
 	return user, nil
 }
 
@@ -79,16 +85,28 @@ func (s *UserStore) Get(user User) (User, error) {
 // Update - Updates a user
 func (s *UserStore) Update(user User) (User, error) {
 	tx := s.DB.MustBegin()
-	s.DB.Exec(updateUserQuery, user.Firstname, user.Lastname, user.ID)
-	tx.Commit()
+	_, err := s.DB.Exec(updateUserQuery, user.Firstname, user.Lastname, user.ID)
+	if err != nil {
+		return user, err
+	}
+	err = tx.Commit()
+	if err != nil {
+		return user, err
+	}
 	return user, nil
 }
 
 // Delete - Deletes a user
 func (s *UserStore) Delete(user User) error {
 	tx := s.DB.MustBegin()
-	s.DB.Exec(deleteUserQuery, user.ID)
-	tx.Commit()
+	_, err := s.DB.Exec(deleteUserQuery, user.ID)
+	if err != nil {
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

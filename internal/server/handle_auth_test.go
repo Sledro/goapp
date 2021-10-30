@@ -45,7 +45,8 @@ func TestHandleAuthLogin(t *testing.T) {
 			ExpectedStatusCode: http.StatusUnauthorized,
 			TestFunc: func(body []byte, t *testing.T) {
 				var res map[string]interface{}
-				json.Unmarshal(body, &res)
+				err := json.Unmarshal(body, &res)
+				assert.Equal(t, err, nil)
 				assert.Equal(t, map[string]interface{}{"error": "sql: no rows in result set"}, res)
 			},
 		},
