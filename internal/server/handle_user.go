@@ -35,16 +35,21 @@ func (s *server) handleUserCreate(w http.ResponseWriter, r *http.Request) {
 // handleUserGet - Get a user
 func (s *server) handleUserGet(w http.ResponseWriter, r *http.Request) {
 	// Read the request
-	user := api.Read(w, r).(store.User)
+	var user store.User
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		api.ERROR(w, http.StatusUnprocessableEntity, errors.New("could not decode JSON body"))
+		return
+	}
 
 	// Get user
-	user, err := s.services.UserService.Get(user)
+	u, err := s.services.UserService.Get(user)
 	if err != nil {
 		api.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	api.JSON(w, http.StatusCreated, user)
+	api.JSON(w, http.StatusCreated, u)
 }
 
 // handleUserUpdate - Updates a user
