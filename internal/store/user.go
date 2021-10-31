@@ -1,6 +1,7 @@
 package store
 
 import (
+	"database/sql"
 	"errors"
 
 	"github.com/jmoiron/sqlx"
@@ -30,11 +31,11 @@ type UserStoreInterface interface {
 
 var UserStoreInstance UserStoreInterface = &UserStore{}
 
-var createUserQuery = `
+var CreateUserQuery = `
 INSERT INTO users (firstname, lastname, username, password, email)
-VALUES (:firstname, :lastname, :username, :password, :email)`
+VALUES ($1, $2, $3, $4, $5)`
 
-var getUserQuery = `
+var GetUserQuery = `
 SELECT id, firstname, lastname, username, email
 FROM users
 WHERE id=$1 OR username=$2 OR email=$3`
@@ -61,7 +62,7 @@ FROM users`
 // Create - Creates a user
 func (s *UserStore) Create(user User) (User, error) {
 	tx := s.DB.MustBegin()
-	_, err := tx.NamedExec(createUserQuery, &user)
+	_, err := tx.Exec(CreateUserQuery, &user.Firstname, &user.Lastname, &user.Username, &user.Password, &user.Email)
 	if err != nil {
 		return user, err
 	}
@@ -74,12 +75,15 @@ func (s *UserStore) Create(user User) (User, error) {
 
 // Get - Gets a user
 func (s *UserStore) Get(user User) (User, error) {
-	userRes := User{}
-	err := s.DB.Get(&userRes, getUserQuery, user.ID, user.Username, user.Email)
+	u := User{}
+	err := s.DB.Get(&u, GetUserQuery, user.ID, user.Username, user.Email)
 	if err != nil {
-		return userRes, errors.New("user not found")
+		if err == sql.ErrNoRows {
+			return u, errors.New("user does not exist")
+		}
+		return u, err
 	}
-	return userRes, nil
+	return u, nil
 }
 
 // Update - Updates a user

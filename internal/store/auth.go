@@ -16,7 +16,7 @@ type AuthStoreInterface interface {
 
 var AuthStoreInstance AuthStoreInterface = &AuthStore{}
 
-var loginQuery = `
+var LoginQuery = `
 SELECT * 
 FROM users 
 WHERE email=$1`
@@ -24,7 +24,7 @@ WHERE email=$1`
 // Login - Returns user of provided email
 func (a *AuthStore) Login(user User) (User, error) {
 	u := User{}
-	err := a.DB.Get(&u, loginQuery, user.Email)
+	err := a.DB.Get(&u, LoginQuery, user.Email)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return u, errors.New("user does not exist")

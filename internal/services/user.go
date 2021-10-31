@@ -23,21 +23,26 @@ var UserServiceInstance UserServiceInterface = &UserService{}
 
 // Create - Create a user
 func (s *UserService) Create(user store.User) (store.User, error) {
-	pass, err := auth.HashPassword(user.Password)
-	user.Password = string(pass)
-	if err != nil {
-		return user, nil
-	}
 	// Check if user already exists
-	_, err = s.UserStore.Get(user)
-	if err == nil {
-		return user, errors.New("username or email already exists")
+	u, _ := s.UserStore.Get(user)
+	if u.ID >= 0 {
+		return store.User{}, errors.New("this user already exists")
 	}
 
+	// Hash password before we store it
+	pass, err := auth.HashPassword(user.Password)
+	if err != nil {
+		return user, err
+	}
+	user.Password = string(pass)
+
+	// Store user
 	user, err = s.UserStore.Create(user)
 	if err != nil {
-		return user, nil
+		return user, err
 	}
+	// Remove passowrd before returning
+	user.Password = ""
 	return user, nil
 }
 

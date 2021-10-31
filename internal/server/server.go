@@ -8,10 +8,10 @@ import (
 	"github.com/micro/go-micro/util/log"
 	"github.com/sirupsen/logrus"
 
+	"github.com/sledro/goapp/internal/logger"
 	"github.com/sledro/goapp/internal/secrets"
 	"github.com/sledro/goapp/internal/services"
 	"github.com/sledro/goapp/internal/store"
-	"github.com/sledro/goapp/pkg/logger"
 )
 
 // Server type

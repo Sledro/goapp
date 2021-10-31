@@ -2,9 +2,11 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"testing"
 
+	"github.com/sledro/goapp/internal/store"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,29 +15,44 @@ func TestHandleAuthLogin(t *testing.T) {
 	cases := []HandlerTestCase{
 		{
 			Name:        "Test Happy Path",
-			Route:       "http://0.0.0.0:8080/v1/auth",
-			Method:      "POST",
+			Route:       "/v1/auth",
+			Method:      http.MethodPost,
 			ContentType: "application/json",
 			Auth:        "",
 			Body: `{
-				"email":"john@doe.com",
+				"email":"test@test.com",
 				"password":"12345678"
 			}`,
 			ExpectedStatusCode: http.StatusOK,
+			MockFunc: func(c *HandlerTestCase) {
+				c.MockDB.ExpectQuery(store.LoginQuery).WithArgs("test@test.com").
+					WillReturnRows(c.MockDB.NewRows([]string{"email", "username"}).AddRow("test@test.com", "username"))
+			},
+			TestFunc: func(body []byte, t *testing.T) {
+				var res map[string]interface{}
+				err := json.Unmarshal(body, &res)
+				assert.Equal(t, err, nil)
+			},
 		},
 		{
-			Name:               "Test No JSON Body",
-			Route:              "http://0.0.0.0:8080/v1/auth",
-			Method:             "POST",
+			Name:               "Test Could not decode JSON body",
+			Route:              "/v1/auth",
+			Method:             http.MethodPost,
 			ContentType:        "application/json",
 			Auth:               "",
-			Body:               ``,
+			Body:               `-}`,
 			ExpectedStatusCode: http.StatusUnprocessableEntity,
+			TestFunc: func(body []byte, t *testing.T) {
+				var res map[string]interface{}
+				err := json.Unmarshal(body, &res)
+				assert.Equal(t, err, nil)
+				assert.Equal(t, map[string]interface{}{"error": "could not decode JSON body"}, res)
+			},
 		},
 		{
 			Name:        "Test User Not Found",
-			Route:       "http://0.0.0.0:8080/v1/auth",
-			Method:      "POST",
+			Route:       "/v1/auth",
+			Method:      http.MethodPost,
 			ContentType: "application/json",
 			Auth:        "",
 			Body: `{
@@ -43,11 +60,15 @@ func TestHandleAuthLogin(t *testing.T) {
 				"password":"12345678"
 			}`,
 			ExpectedStatusCode: http.StatusUnauthorized,
+			MockFunc: func(c *HandlerTestCase) {
+				c.MockDB.ExpectQuery(store.LoginQuery).WithArgs("test@test.com").
+					WillReturnError(errors.New("user does not exist"))
+			},
 			TestFunc: func(body []byte, t *testing.T) {
 				var res map[string]interface{}
 				err := json.Unmarshal(body, &res)
 				assert.Equal(t, err, nil)
-				assert.Equal(t, map[string]interface{}{"error": "sql: no rows in result set"}, res)
+				assert.Equal(t, map[string]interface{}{"error": "user does not exist"}, res)
 			},
 		},
 	}

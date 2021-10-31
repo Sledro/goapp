@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/sledro/goapp/api"
@@ -20,7 +21,7 @@ func (s *server) handleAuthLogin(w http.ResponseWriter, r *http.Request) {
 	var credentials Credentials
 	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
-		api.ERROR(w, http.StatusUnprocessableEntity, err)
+		api.ERROR(w, http.StatusUnprocessableEntity, errors.New("could not decode JSON body"))
 		return
 	}
 	// Check the password and get the token

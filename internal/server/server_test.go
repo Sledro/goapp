@@ -8,7 +8,8 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/go-chi/chi"
+	"github.com/sledro/goapp/internal/logger"
+	"github.com/sledro/goapp/internal/services"
 	"github.com/sledro/goapp/internal/store"
 )
 
@@ -29,17 +30,34 @@ type HandlerTestCase struct {
 // NewTestServer - Creates a new test server
 func NewTestServer(t *testing.T) (*httptest.Server, sqlmock.Sqlmock, server) {
 	// Create a new server
-	server := server{}
+	s := server{}
+	// Inject logger
+	s.log = logger.NewLogger()
+	var err error
 	// Create new mock db
 	db, mock, err := store.NewTestDatabase()
 	if err != nil {
 		t.Fatal(err)
 	}
 	// Inject mock db
-	server.db = db
+	s.db = db
+	// Inject stores
+	store.UserStoreInstance = &store.UserStore{DB: s.db}
+	store.AuthStoreInstance = &store.AuthStore{DB: s.db}
+	s.stores = &Stores{
+		UserStore: store.UserStoreInstance,
+		AuthStore: store.AuthStoreInstance,
+	}
+	// Inject services
+	services.UserServiceInstance = &services.UserService{UserStore: s.stores.UserStore}
+	services.AuthServiceInstance = &services.AuthService{DB: s.db, JWTSecret: s.secrets.JWTSecret, UserService: services.UserServiceInstance, AuthStore: s.stores.AuthStore}
+	s.services = &Services{
+		AuthService: services.AuthServiceInstance,
+		UserService: services.UserServiceInstance,
+	}
 	// Inject routes
-	server.r = chi.NewRouter()
-	return httptest.NewServer(server.r), mock, server
+	s.routes()
+	return httptest.NewServer(s.r), mock, s
 }
 
 // GenericHandlerTestFunc -
@@ -59,7 +77,7 @@ func (c *HandlerTestCase) GenericHandlerTestFunc() func(t *testing.T) {
 		}
 
 		// Make HTTP request
-		req, err := http.NewRequest(c.Method, c.Route, strings.NewReader(c.Body))
+		req, err := http.NewRequest(c.Method, s.URL+c.Route, strings.NewReader(c.Body))
 		if err != nil {
 			t.Fatal("error making http call", err)
 		}
@@ -77,7 +95,7 @@ func (c *HandlerTestCase) GenericHandlerTestFunc() func(t *testing.T) {
 		}
 
 		if res.StatusCode != c.ExpectedStatusCode {
-			t.Fatalf("error status code %v not expected %v", res.StatusCode, c.ExpectedStatusCode)
+			t.Fatalf("error status code received: %v expected: %v", res.StatusCode, c.ExpectedStatusCode)
 		}
 
 		if c.TestFunc != nil {

@@ -2,11 +2,11 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 
-	validator "github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/sledro/goapp/api"
 	"github.com/sledro/goapp/internal/store"
@@ -18,22 +18,14 @@ func (s *server) handleUserCreate(w http.ResponseWriter, r *http.Request) {
 	var user store.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		api.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	// Validate data
-	validate := validator.New()
-	err = validate.Struct(user)
-	if err != nil {
-		api.ERROR(w, http.StatusUnprocessableEntity, err)
+		api.ERROR(w, http.StatusUnprocessableEntity, errors.New("could not decode JSON body"))
 		return
 	}
 
 	// Create user
 	user, err = s.services.UserService.Create(user)
 	if err != nil {
-		api.ERROR(w, http.StatusInternalServerError, err)
+		api.ERROR(w, http.StatusConflict, err)
 		return
 	}
 
