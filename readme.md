@@ -12,9 +12,9 @@ Template for building a REST API in Go
 - Project structure adheres to https://github.com/golang-standards/project-layout
 - HTTP REST server
 - CRUDL Users
-- Authentication
+- Authentication - wip
 - Dockerized using docker-compose
-- Gorilla Mux
+- Chi Router
 - PostgreSQL
 - SQLX db driver
 - Database Migrations
@@ -37,5 +37,5 @@ The API can be accessed from: http://127.0.0.1:8080
 
 Request:
 ```
-curl --location --request GET "127.0.0.1:8080/v1/api/health"
+curl --location --request GET "127.0.0.1:8080/v1/health"
 ```
