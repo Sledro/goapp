@@ -9,18 +9,18 @@
 
 Template for building a REST API in Go
 
-- Project structure adheres to https://github.com/golang-standards/project-layout
+- Project structure follows to https://github.com/golang-standards/project-layout
 - HTTP REST server
 - CRUDL Users
-- Authentication - wip
+- Authentication
 - Dockerized using docker-compose
 - Chi Router
 - PostgreSQL
 - SQLX db driver
 - Database Migrations
 - Logging
-- Gorm and gin frameworks avoided for full control
 - Config and env var management
+- Postman collection
 
 ## Information
 - database migrations can be found in the `/schemas` dir
