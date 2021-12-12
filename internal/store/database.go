@@ -33,7 +33,7 @@ func NewTestDatabase() (*sqlx.DB, sqlmock.Sqlmock, error) {
 // runMigrations - Runs dataase migrations
 func runMigrations(db *sqlx.DB) {
 	migrations := &migrate.FileMigrationSource{
-		Dir: "schema",
+		Dir: "../../schema",
 	}
 	n, err := migrate.Exec(db.DB, "postgres", migrations, migrate.Up)
 	if err != nil {

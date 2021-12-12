@@ -27,7 +27,7 @@ func CreateToken(userID int, apiSecret string) (string, error) {
 		true,
 		jwt.StandardClaims{
 			Id:        strconv.FormatInt(time.Now().Unix()+int64(userID), 10),
-			Issuer:    "http://localhost.com:5000",
+			Issuer:    "http://localhost.com:8080",
 			IssuedAt:  time.Now().Unix(),
 			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
 		},

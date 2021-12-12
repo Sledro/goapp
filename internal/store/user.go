@@ -25,7 +25,7 @@ type UserStoreInterface interface {
 	Create(user User) (User, error)
 	Get(user User) (User, error)
 	Update(user User) (User, error)
-	Delete(user User) error
+	Delete(userID int) error
 	List(user User) ([]User, error)
 }
 
@@ -42,8 +42,8 @@ WHERE id=$1 OR username=$2 OR email=$3`
 
 var updateUserQuery = `
 UPDATE users 
-SET firstname=$1, lastname=$2 
-WHERE id=$3`
+SET firstname=$1, lastname=$2, username=$3, email=$4
+WHERE id=$5`
 
 var deleteUserQuery = `
 DELETE 
@@ -89,7 +89,7 @@ func (s *UserStore) Get(user User) (User, error) {
 // Update - Updates a user
 func (s *UserStore) Update(user User) (User, error) {
 	tx := s.DB.MustBegin()
-	_, err := s.DB.Exec(updateUserQuery, user.Firstname, user.Lastname, user.ID)
+	_, err := s.DB.Exec(updateUserQuery, user.Firstname, user.Lastname, user.Username, user.Email, user.ID)
 	if err != nil {
 		return user, err
 	}
@@ -100,10 +100,10 @@ func (s *UserStore) Update(user User) (User, error) {
 	return user, nil
 }
 
-// Delete - Deletes a user
-func (s *UserStore) Delete(user User) error {
+// Delete - Deletes a user with given id
+func (s *UserStore) Delete(userID int) error {
 	tx := s.DB.MustBegin()
-	_, err := s.DB.Exec(deleteUserQuery, user.ID)
+	_, err := s.DB.Exec(deleteUserQuery, userID)
 	if err != nil {
 		return err
 	}

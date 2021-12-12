@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"github.com/sledro/goapp/api"
 	"github.com/sledro/goapp/internal/store"
 )
@@ -55,46 +55,49 @@ func (s *server) handleUserGet(w http.ResponseWriter, r *http.Request) {
 // handleUserUpdate - Updates a user
 func (s *server) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
 	// Parse path var
-	userID, err := strconv.Atoi(mux.Vars(r)["id"])
+	userID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		api.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
 	}
 
 	// Read the request
-	user := api.Read(w, r).(store.User)
+	var user store.User
+	err = json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		api.ERROR(w, http.StatusUnprocessableEntity, errors.New("could not decode JSON body"))
+		return
+	}
+
 	// Set userID that we want to update
 	user.ID = userID
 
 	// Update user
 	user, err = s.services.UserService.Update(user)
 	if err != nil {
-		api.ERROR(w, http.StatusInternalServerError, err)
+		s.log.Error(err)
+		api.ERROR(w, http.StatusInternalServerError, errors.New("internal server error"))
 		return
 	}
 
-	api.JSON(w, http.StatusCreated, user)
+	api.JSON(w, http.StatusOK, user)
 }
 
 // handleUserDelete - Deletes a user
 func (s *server) handleUserDelete(w http.ResponseWriter, r *http.Request) {
 	// Parse path var
-	userIDString := mux.Vars(r)["id"]
-	userIDInt, err := strconv.Atoi(userIDString)
+	userID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		api.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
 	}
-	user := store.User{ID: userIDInt}
 
 	// Delete user
-	err = s.services.UserService.Delete(user)
+	err = s.services.UserService.Delete(userID)
 	if err != nil {
 		api.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	api.JSON(w, http.StatusOK, "success")
+	api.JSON(w, http.StatusOK, map[string]interface{}{"success": true})
 }
 
 // handleUserList - Get a list of all users
@@ -123,6 +126,10 @@ func (s *server) handleUserList(w http.ResponseWriter, r *http.Request) {
 		api.ERROR(w, http.StatusInternalServerError, err)
 		return
 	}
+	if len(userList) > 0 {
+		api.JSON(w, http.StatusCreated, userList)
+	} else {
+		api.JSON(w, http.StatusOK, map[string]interface{}{"error": "no users"})
+	}
 
-	api.JSON(w, http.StatusCreated, userList)
 }

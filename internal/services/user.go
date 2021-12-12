@@ -15,7 +15,7 @@ type UserServiceInterface interface {
 	Create(user store.User) (store.User, error)
 	Get(user store.User) (store.User, error)
 	Update(user store.User) (store.User, error)
-	Delete(user store.User) error
+	Delete(userID int) error
 	List(user store.User) ([]store.User, error)
 }
 
@@ -25,7 +25,7 @@ var UserServiceInstance UserServiceInterface = &UserService{}
 func (s *UserService) Create(user store.User) (store.User, error) {
 	// Check if user already exists
 	u, _ := s.UserStore.Get(user)
-	if u.ID >= 0 {
+	if u.ID > 0 {
 		return store.User{}, errors.New("this user already exists")
 	}
 
@@ -64,9 +64,9 @@ func (s *UserService) Update(user store.User) (store.User, error) {
 	return user, nil
 }
 
-// Delete - Deletes a user
-func (s *UserService) Delete(user store.User) error {
-	err := s.UserStore.Delete(user)
+// Delete - Deletes a user with given id
+func (s *UserService) Delete(userID int) error {
+	err := s.UserStore.Delete(userID)
 	if err != nil {
 		return err
 	}

@@ -24,7 +24,7 @@ type Secrets struct {
 // secrets manager
 func LoadSecrets(secretName, region string) (Secrets, error) {
 	secrets := Secrets{}
-	configJSON, err := ioutil.ReadFile("configs/secrets.json")
+	configJSON, err := ioutil.ReadFile("../../configs/secrets.json")
 	if err != nil {
 		return secrets, err
 	}

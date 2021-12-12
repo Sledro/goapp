@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/sledro/goapp/api"
+	middl "github.com/sledro/goapp/internal/middleware"
 )
 
 // routes - Setups chi router, middlewares and defines all api endpoints
@@ -63,9 +64,9 @@ func (s *server) routes() {
 		r.Route("/user", func(r chi.Router) {
 			r.Post("/", s.handleUserCreate)
 			r.Get("/", s.handleUserGet)
-			r.Put("/user/{id}", s.handleUserUpdate)
-			r.Delete("/user/{id}", s.handleUserDelete)
-			r.Get("/list", s.handleUserList)
+			r.Put("/{id}", middl.Auth(s.handleUserUpdate, s.secrets.JWTSecret))
+			r.Delete("/{id}", middl.Auth(s.handleUserDelete, s.secrets.JWTSecret))
+			r.Get("/list", middl.Auth(s.handleUserList, s.secrets.JWTSecret))
 		})
 
 	})
