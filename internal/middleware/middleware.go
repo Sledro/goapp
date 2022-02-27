@@ -8,8 +8,8 @@ import (
 	"github.com/sledro/goapp/pkg/auth"
 )
 
-// Auth - Sets Auth checek on a route. Checks JWT
-// token is valid or returns status 404 Unauthorized
+// Sets Auth checek on a route. Checks JWT token
+// is valid or returns status 404 Unauthorized
 func Auth(next http.HandlerFunc, jwtSecret string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := auth.TokenValid(r, jwtSecret)

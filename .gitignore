@@ -15,4 +15,5 @@
 data
 .vscode
 .env
+secrets.json
 todo.txt

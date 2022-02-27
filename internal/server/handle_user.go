@@ -12,7 +12,7 @@ import (
 	"github.com/sledro/goapp/internal/store"
 )
 
-// handleUserCreate - Create a user
+// Creates a user
 func (s *server) handleUserCreate(w http.ResponseWriter, r *http.Request) {
 	// Read the request
 	var user store.User
@@ -32,7 +32,7 @@ func (s *server) handleUserCreate(w http.ResponseWriter, r *http.Request) {
 	api.JSON(w, http.StatusCreated, user)
 }
 
-// handleUserGet - Get a user
+// Gets a user
 func (s *server) handleUserGet(w http.ResponseWriter, r *http.Request) {
 	// Read the request
 	var user store.User
@@ -52,7 +52,7 @@ func (s *server) handleUserGet(w http.ResponseWriter, r *http.Request) {
 	api.JSON(w, http.StatusCreated, u)
 }
 
-// handleUserUpdate - Updates a user
+// Update a user
 func (s *server) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
 	// Parse path var
 	userID, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -82,7 +82,7 @@ func (s *server) handleUserUpdate(w http.ResponseWriter, r *http.Request) {
 	api.JSON(w, http.StatusOK, user)
 }
 
-// handleUserDelete - Deletes a user
+// Deletes a user
 func (s *server) handleUserDelete(w http.ResponseWriter, r *http.Request) {
 	// Parse path var
 	userID, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -100,7 +100,7 @@ func (s *server) handleUserDelete(w http.ResponseWriter, r *http.Request) {
 	api.JSON(w, http.StatusOK, map[string]interface{}{"success": true})
 }
 
-// handleUserList - Get a list of all users
+// Gets a list of all users
 func (s *server) handleUserList(w http.ResponseWriter, r *http.Request) {
 	// Read the request body
 	body, err := ioutil.ReadAll(r.Body)

@@ -2,42 +2,65 @@ package secrets
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"github.com/go-playground/validator/v10"
 )
 
-// Secrets - Application secrets
-type Secrets struct {
-	DBHost     string `json:"db_host"`
-	DBPort     string `json:"db_port"`
-	DBUser     string `json:"db_user"`
-	DBPass     string `json:"db_pass"`
-	DBDatabase string `json:"db_database"`
-	JWTSecret  string `json:"jwt_secret"`
+// Loads application secrets from local FILE or AWS
+func LoadSecrets() (Secrets, error) {
+	secretType := os.Getenv("SECRET_TYPE")
+	if (secretType == "" || secretType != "AWS") && (secretType == "" || secretType != "FILE") {
+		return Secrets{}, errors.New("environment variable SECRET_TYPE must be set as either 'AWS' or 'FILE'")
+	}
+	secretName := os.Getenv("SECRET_NAME")
+	if secretName == "" {
+		return Secrets{}, errors.New("environment variable SECRET_NAME must be set as either AWS secret name or path to config FILE")
+	}
+	switch secretType {
+	case "FILE":
+		return LoadSecretsFromFile(secretName)
+	case "AWS":
+		return LoadSecretsFromAWS(secretName)
+	default:
+		return Secrets{}, errors.New("environment variable SECRET_TYPE value is unknown")
+	}
 }
 
-// LoadSecrets - first attempts to load secrets from secrets.json file
-// if no secrets.json file is found, will attempt to load from aws
-// secrets manager
-func LoadSecrets(secretName, region string) (Secrets, error) {
+// Load secrets from local config file
+func LoadSecretsFromFile(secretName string) (Secrets, error) {
 	secrets := Secrets{}
-	configJSON, err := ioutil.ReadFile("../../configs/secrets.json")
+
+	// Read local secrets file
+	configJSON, err := ioutil.ReadFile(secretName)
 	if err != nil {
 		return secrets, err
 	}
+
+	// Marshal secrets file into secrets struct
 	err = json.Unmarshal([]byte(configJSON), &secrets)
 	if err != nil {
-		// No local config file found, load from AWS
-		return loadAWSSecrets(secretName, region), nil
+		return secrets, err
 	}
+	err = validator.New().Struct(secrets)
+	if err == nil {
+		return secrets, nil
+	}
+	validationErrors := err.(validator.ValidationErrors)
+	if validationErrors != nil {
+		return Secrets{}, err
+	}
+
 	return secrets, nil
 }
 
-// loadAWSSecrets - load secrets from aws secrets manager
-func loadAWSSecrets(secretName, region string) Secrets {
+// Load secrets from AWS secrets manager
+func LoadSecretsFromAWS(secretName string) (Secrets, error) {
 	secrets := Secrets{}
 
 	// Create a new AWS session
@@ -54,13 +77,21 @@ func loadAWSSecrets(secretName, region string) Secrets {
 	// Get the secret from AWS
 	output, err := svc.GetSecretValue(input)
 	if err != nil {
-		panic(err)
+		return Secrets{}, err
 	}
 
+	// Marshal AWS  secrets into secrets struct
 	err = json.Unmarshal([]byte(*output.SecretString), &secrets)
 	if err != nil {
-		panic(err)
+		return Secrets{}, err
 	}
 
-	return secrets
+	err = validator.New().Struct(secrets)
+	validationErrors := err.(validator.ValidationErrors)
+	if validationErrors != nil {
+		return Secrets{}, err
+	}
+	// values not valid, deal with errors here
+
+	return secrets, nil
 }

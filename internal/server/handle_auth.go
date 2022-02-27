@@ -8,13 +8,13 @@ import (
 	"github.com/sledro/goapp/api"
 )
 
-// Credentials - Holds login credentials
+// Holds login credentials
 type Credentials struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
 }
 
-// handleAuthLogin - This function checks the users email and password
+// This function checks the users email and password
 // match. If they matcn an oauth token is returned
 func (s *server) handleAuthLogin(w http.ResponseWriter, r *http.Request) {
 	// Read the request

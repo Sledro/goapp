@@ -11,7 +11,7 @@ import (
 	middl "github.com/sledro/goapp/internal/middleware"
 )
 
-// routes - Setups chi router, middlewares and defines all api endpoints
+// Sets up chi router, middlewares and defines all api endpoints
 func (s *server) routes() {
 	// Inject routes
 	s.r = chi.NewRouter()

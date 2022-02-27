@@ -6,14 +6,14 @@ import (
 	"net/http"
 )
 
-// Response - Wrap/format responses
+// Wrap and format responses
 type Response struct {
 	StatusCode int         `json:"status_code"`
 	Err        bool        `json:"error"`
 	Response   interface{} `json:"response"`
 }
 
-// JSON - Returns JSON response to the useer. HTTP status code
+// Returns JSON response to the API user. HTTP status code
 // and data must be provided
 func JSON(w http.ResponseWriter, statusCode int, data interface{}) {
 	w.WriteHeader(statusCode)
@@ -23,7 +23,7 @@ func JSON(w http.ResponseWriter, statusCode int, data interface{}) {
 	}
 }
 
-// ERROR - Returns ann error to the user
+// Returns ann error to the API user
 func ERROR(w http.ResponseWriter, statusCode int, err error) {
 	w.WriteHeader(statusCode)
 	err = json.NewEncoder(w).Encode(map[string]interface{}{"error": err.Error()})

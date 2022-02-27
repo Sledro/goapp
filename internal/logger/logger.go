@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// NewLogger - Create and returns a new logrus instance
+// Creates and returns a new logrus instance
 func NewLogger() *logrus.Logger {
 	// Create a new instance of the logger. You can have any number of instances.
 	var log = logrus.New()

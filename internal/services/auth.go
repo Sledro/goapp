@@ -20,7 +20,7 @@ type AuthServiceInterface interface {
 
 var AuthServiceInstance AuthServiceInterface = &AuthService{}
 
-// Login - Here we checek the user email exists and the passwords match.
+// Here we checek the user email exists and the passwords match.
 // Finally an auth token is created and returned
 func (s *AuthService) Login(email, password string) (string, error) {
 	// Check user with that email exists

@@ -21,7 +21,7 @@ type UserServiceInterface interface {
 
 var UserServiceInstance UserServiceInterface = &UserService{}
 
-// Create - Create a user
+// Create a user
 func (s *UserService) Create(user store.User) (store.User, error) {
 	// Check if user already exists
 	u, _ := s.UserStore.Get(user)
@@ -46,7 +46,7 @@ func (s *UserService) Create(user store.User) (store.User, error) {
 	return user, nil
 }
 
-// Get - Get a user
+// Get a user
 func (s *UserService) Get(user store.User) (store.User, error) {
 	user, err := s.UserStore.Get(user)
 	if err != nil {
@@ -55,7 +55,7 @@ func (s *UserService) Get(user store.User) (store.User, error) {
 	return user, nil
 }
 
-// Update - Updates a user
+// Updates a user
 func (s *UserService) Update(user store.User) (store.User, error) {
 	user, err := s.UserStore.Update(user)
 	if err != nil {
@@ -64,7 +64,7 @@ func (s *UserService) Update(user store.User) (store.User, error) {
 	return user, nil
 }
 
-// Delete - Deletes a user with given id
+// Deletes a user with given id
 func (s *UserService) Delete(userID int) error {
 	err := s.UserStore.Delete(userID)
 	if err != nil {
@@ -73,7 +73,7 @@ func (s *UserService) Delete(userID int) error {
 	return nil
 }
 
-// List - Get list of all users
+// Get list of all users
 func (s *UserService) List(user store.User) ([]store.User, error) {
 	userList, err := s.UserStore.List(user)
 	if err != nil {
