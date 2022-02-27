@@ -1,15 +1,15 @@
 -- +migrate Up
 -- SQL in section 'Up' is executed when this migration is applied
-CREATE TABLE users
+create table users
 (
-	id serial
-		constraint users_pk
-			primary key,
-	firstname varchar,
-	lastname varchar,
-	username varchar,
-	password varchar,
-	email varchar
+	id int auto_increment,
+	firstname varchar(255) null,
+	lastname varchar(255) null,
+	username varchar(255) null,
+	password varchar(255) null,
+	email varchar(255) null,
+	constraint users_pk
+		primary key (id)
 );
 
 -- +migrate Down

@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/jmoiron/sqlx"
-	"github.com/micro/go-micro/util/log"
 	"github.com/sirupsen/logrus"
 
 	"github.com/sledro/goapp/internal/logger"
@@ -72,9 +71,9 @@ func NewServer() (server, error) {
 // Load routes into server and
 // starts HTTP server
 func (s *server) StartServer() {
-	log.Info("📡 Server Started. API Server is now listening on http://localhost:" + s.secrets.AppPort)
+	s.log.Info("📡 Server Started. API Server is now listening on http://localhost:" + s.secrets.AppPort)
 	s.routes()
-	log.Fatal(http.ListenAndServe(":"+s.secrets.AppPort, s.r))
+	s.log.Fatal(http.ListenAndServe(":"+s.secrets.AppPort, s.r))
 }
 
 // Turns server into http server

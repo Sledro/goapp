@@ -5,16 +5,16 @@ import (
 	"log"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 	migrate "github.com/rubenv/sql-migrate"
 )
 
 // NewDatabase - Create a new database conection. Schema will be migrated if
 // not found
 func NewDatabase(username, password, host, port, database string) *sqlx.DB {
-	connString := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable", username, password, host, port, database)
-	db, err := sqlx.Connect("postgres", connString)
+	connString := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true", username, password, host, port, database)
+	db, err := sqlx.Connect("mysql", connString)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -26,7 +26,7 @@ func NewDatabase(username, password, host, port, database string) *sqlx.DB {
 // NewTestDatabase - Create a new mock database conection
 func NewTestDatabase() (*sqlx.DB, sqlmock.Sqlmock, error) {
 	mockDB, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
-	mockDBSQLX := sqlx.NewDb(mockDB, "postgres") // returns *sqlx.DB
+	mockDBSQLX := sqlx.NewDb(mockDB, "mysql") // returns *sqlx.DB
 	return mockDBSQLX, mock, err
 }
 
@@ -35,7 +35,7 @@ func runMigrations(db *sqlx.DB) {
 	migrations := &migrate.FileMigrationSource{
 		Dir: "../../schema",
 	}
-	n, err := migrate.Exec(db.DB, "postgres", migrations, migrate.Up)
+	n, err := migrate.Exec(db.DB, "mysql", migrations, migrate.Up)
 	if err != nil {
 		log.Fatalln(err)
 	}

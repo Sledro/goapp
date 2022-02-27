@@ -33,27 +33,27 @@ var UserStoreInstance UserStoreInterface = &UserStore{}
 
 var CreateUserQuery = `
 INSERT INTO users (firstname, lastname, username, password, email)
-VALUES ($1, $2, $3, $4, $5)`
+VALUES (?, ?, ?, ?, ?)`
 
 var GetUserQuery = `
 SELECT id, firstname, lastname, username, email
 FROM users
-WHERE id=$1 OR username=$2 OR email=$3`
+WHERE id=? OR username=? OR email=?`
 
 var updateUserQuery = `
 UPDATE users 
-SET firstname=$1, lastname=$2, username=$3, email=$4
-WHERE id=$5`
+SET firstname=?, lastname=?, username=?, email=?
+WHERE id=?`
 
 var deleteUserQuery = `
 DELETE 
 FROM users 
-WHERE id=$1`
+WHERE id=?`
 
 var getUserListQuery = `
 SELECT id, firstname, lastname, username, email
 FROM users
-WHERE id=$1 OR firstname=$2 OR lastname=$3 OR username=$4 OR email=$5`
+WHERE id=? OR firstname=? OR lastname=? OR username=? OR email=?`
 
 var getUserListAllQuery = `
 SELECT id, firstname, lastname, username, email

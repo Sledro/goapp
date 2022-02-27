@@ -19,9 +19,9 @@ var AuthStoreInstance AuthStoreInterface = &AuthStore{}
 var LoginQuery = `
 SELECT * 
 FROM users 
-WHERE email=$1`
+WHERE email=?`
 
-// Login - Returns user of provided email
+// Returns user of provided email
 func (a *AuthStore) Login(user User) (User, error) {
 	u := User{}
 	err := a.DB.Get(&u, LoginQuery, user.Email)
